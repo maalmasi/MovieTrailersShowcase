@@ -10,7 +10,7 @@ public class MovieTrailerController(IMovieTrailerService movieTrailerService) : 
 {
     [HttpGet]
     [Route(nameof(FindByQuery))]
-    //[ResponseCache(Duration = 86400)]
+    [ResponseCache(Duration = 86400)]
     public async Task<ActionResult<MovieListResponseDto>> FindByQuery(string query, int page, string lang = "en-US", bool displayAdult = false, string? region = null)
     {
 
@@ -24,7 +24,7 @@ public class MovieTrailerController(IMovieTrailerService movieTrailerService) : 
 
     [HttpGet]
     [Route(nameof(GetById))]
-    //[ResponseCache(Duration = 3600)]
+    [ResponseCache(Duration = 3600)]
     public async Task<ActionResult<MovieCompleteInfoResponseDto>> GetById(int id, string lang = "en-US")
     {
         if (id <= 0)
