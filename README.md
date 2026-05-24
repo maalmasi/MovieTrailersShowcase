@@ -1,6 +1,6 @@
 # Movie Trailers Showcase
 
-This is a .NET 10 WebAPI showcase project. 
+This is a .NET 10 WebAPI showcase project. It was done in a 4 hour window as was the requirement of the challenge.
 It allows a user to fetch movies from TMDB by search query or ID.
 It will append the URL of the movie trailer to every movie in all requests.
 
