@@ -1,4 +1,6 @@
-﻿using Application.Abstractions.Clients;
+﻿using Application.Abstractions.Caching;
+using Application.Abstractions.Clients;
+using Infrastructure.Caching;
 using Infrastructure.Clients;
 using Infrastructure.Policies;
 using Microsoft.Extensions.Configuration;
@@ -12,7 +14,11 @@ public static class DependencyInjection
     {
         services.AddTMDBClient(configuration);
         services.AddSingleton<ITmdbHttpClient, TmdbHttpClient>();
-
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+        });
+        services.AddSingleton<ICacheService, RedisCacheService>();
         return services;
     }
 
