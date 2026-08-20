@@ -1,4 +1,5 @@
-﻿using Application.Abstractions.Clients;
+﻿using Application.Abstractions.Caching;
+using Application.Abstractions.Clients;
 using Application.Abstractions.Services;
 using Application.DTOs.Data;
 using Application.DTOs.Response;
@@ -7,10 +8,17 @@ using Domain.Models.Response;
 
 namespace Application.Services;
 
-public class MovieTrailerService(ITmdbHttpClient tmdbHttpClient) : IMovieTrailerService
+public class MovieTrailerService(ITmdbHttpClient tmdbHttpClient, ICacheService cacheService) : IMovieTrailerService
 {
     public async Task<MovieListResponseDto> GetMovieTrailersAsync(string query, int page, string lang, bool displayAdult, string? region)
     {
+        string cacheKey = $"movies_{query}_{page}_{lang}_{displayAdult}_{region}";
+        var cachedMovies = await cacheService.GetAsync<MovieListResponseDto>(cacheKey);
+        if (cachedMovies != null)
+        {
+            return cachedMovies;
+        }
+
         MovieInfoResponse movieInfoResponse = await tmdbHttpClient.GetMoviesAsync(query, page, lang, displayAdult, region);
         var moviesDto = new MovieListResponseDto
         {
@@ -50,11 +58,20 @@ public class MovieTrailerService(ITmdbHttpClient tmdbHttpClient) : IMovieTrailer
             }
         }
 
+        await cacheService.SetAsync(cacheKey, moviesDto, TimeSpan.FromHours(24));
+
         return moviesDto;
     }
 
     public async Task<MovieCompleteInfoResponseDto> GetMovieCompleteInfoAsync(int id, string lang)
     {
+        string cacheKey = $"movie_{id}_{lang}";
+        var cachedMovie = await cacheService.GetAsync<MovieCompleteInfoResponseDto>(cacheKey);
+        if (cachedMovie != null)
+        {
+            return cachedMovie;
+        }
+
         MovieCompleteInfoResponse movieInfo = await tmdbHttpClient.GetMovieDetailsById(id, lang);
 
         var movieDto = new MovieCompleteInfoResponseDto
@@ -117,6 +134,9 @@ public class MovieTrailerService(ITmdbHttpClient tmdbHttpClient) : IMovieTrailer
             // find trailer by movie title elsewhere
         }
 
+        await cacheService.SetAsync(cacheKey, movieDto, TimeSpan.FromHours(12));
+
         return movieDto;
     }
 }
+
